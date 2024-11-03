@@ -9,12 +9,12 @@ const ShopContextProvider = (props) => {
   const currency = "$";
   const delivery_fee = 10;
   const backendUrl = import.meta.env.VITE_BACKEND_URL;
-  const [search, setSearch] = useState('');
+  const [search, setSearch] = useState("");
   const [showSearch, setShowSearch] = useState(false);
   const [cartItems, setCartItems] = useState({});
   const [products, setProducts] = useState([]);
   const [orders, setOrders] = useState([]);
-  const [token, setToken] = useState('')
+  const [token, setToken] = useState("");
   const navigate = useNavigate();
 
   const placeOrder = async (orderData) => {
@@ -37,7 +37,7 @@ const ShopContextProvider = (props) => {
         id: orders.length + 1,
         items: orderItems,
         ...orderData,
-        date: new Date().toLocaleDateString(),
+        date: new Date().toISOString(),
         status: "Ready to Ship",
       };
 
@@ -49,37 +49,48 @@ const ShopContextProvider = (props) => {
     }
   };
 
-  const addToCart = async (itemId, size) => {
-    if (!size) {
+  const addToCart = async (itemId, sizes) => {
+    if (sizes.length === 0) {
       toast.error("Select Product Size");
       return;
     }
 
     if (token) {
       try {
+        await axios.post(
+          backendUrl + "/api/cart/add",
+          { itemId, sizes },
+          { headers: { token } }
+        );
+        setCartItems((prevCart) => {
+          const updatedCart = { ...prevCart };
+          updatedCart[itemId] = {
+            ...(updatedCart[itemId] || {}),
+            ...sizes.reduce((acc, size) => {
+              acc[size] = (updatedCart[itemId]?.[size] || 0) + 1;
+              return acc;
+            }, {}),
+          };
+          return updatedCart;
+        });
 
-        await axios.post(backendUrl + '/api/cart/add', { itemId, size }, { headers: { token } })
-
+        toast.success("Item added to cart!");
       } catch (error) {
-        console.log(error)
-        toast.error(error.message)
-
+        console.log(error);
+        toast.error(error.message);
       }
     }
   };
 
   const updateQuantity = async (itemId, size, quantity) => {
-    // Update the frontend cart state
     setCartItems((prevCart) => {
       const updatedCart = { ...prevCart };
       if (quantity > 0) {
-        // Update quantity if greater than 0
         updatedCart[itemId] = {
           ...(updatedCart[itemId] || {}),
           [size]: quantity,
         };
       } else {
-        // Remove the item if quantity is 0
         delete updatedCart[itemId][size];
         if (Object.keys(updatedCart[itemId]).length === 0) {
           delete updatedCart[itemId];
@@ -87,7 +98,7 @@ const ShopContextProvider = (props) => {
       }
       return updatedCart;
     });
-  
+
     // Sync with the backend if the user is logged in
     if (token) {
       try {
@@ -103,7 +114,6 @@ const ShopContextProvider = (props) => {
       }
     }
   };
-  
 
   const getCartCount = () => {
     return Object.values(cartItems).reduce((total, sizes) => {
@@ -147,17 +157,43 @@ const ShopContextProvider = (props) => {
 
   const getUserCart = async () => {
     try {
-      
-       const response = await axios.post(backendUrl + '/api/cart/get',{},{headers:{token}})
-       if (response.data.success) {
-        setCartItems(response.data.cartData)
-       }
-
+      const response = await axios.post(
+        backendUrl + "/api/cart/get",
+        {},
+        { headers: { token } }
+      );
+      if (response.data.success) {
+        setCartItems(response.data.cartData);
+      }
     } catch (error) {
       console.error(error);
       toast.error(error.message);
     }
-  }
+  };
+
+  const getUserOrders = async () => {
+    try {
+      const response = await axios.post(
+        `${backendUrl}/api/order/userorders`,
+        { userId: token }, // Ensure you're sending the userId
+        { headers: { token } }
+      );
+      if (response.data.success) {
+        setOrders(response.data.orders); // Update the orders state
+      } else {
+        toast.error(response.data.message);
+      }
+    } catch (error) {
+      console.error("Failed to fetch user orders:", error);
+      toast.error(error.message);
+    }
+  };
+
+  useEffect(() => {
+    if (token) {
+      getUserOrders();
+    }
+  }, [token]);
 
   useEffect(() => {
     getProductsData();
@@ -172,20 +208,18 @@ const ShopContextProvider = (props) => {
 
   useEffect(() => {
     // Check for token in local storage on component mount
-    const savedToken = localStorage.getItem('token');
+    const savedToken = localStorage.getItem("token");
     if (savedToken) {
       setToken(savedToken);
     }
   }, []);
-  
+
   useEffect(() => {
     // Fetch cart data once token is available
     if (token) {
       getUserCart();
     }
   }, [token]);
-  
-  
 
   const value = {
     products,
@@ -196,7 +230,7 @@ const ShopContextProvider = (props) => {
     showSearch,
     setShowSearch,
     cartItems,
-    setCartItems, 
+    setCartItems,
     addToCart,
     getCartCount,
     getCartAmount,
@@ -206,8 +240,9 @@ const ShopContextProvider = (props) => {
     updateQuantity,
     setToken,
     token,
-    backendUrl
-};
+    backendUrl,
+    getUserOrders,
+  };
 
   return (
     <ShopContext.Provider value={value}>{props.children}</ShopContext.Provider>

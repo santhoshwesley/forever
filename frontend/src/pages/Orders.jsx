@@ -3,27 +3,25 @@ import { ShopContext } from "../context/ShopContext";
 import Title from "../components/Title";
 
 const Orders = () => {
-  const { orders, currency } = useContext(ShopContext); // Ensure fetchOrders is coming from context
+  const { orders, currency, getUserOrders } = useContext(ShopContext);
   const [loading, setLoading] = useState(true);
 
-
-  
   useEffect(() => {
     const loadOrders = async () => {
       try {
-        // Call fetchOrders from context
-        console.log(orders);
-        
+        // Log currency and orders to see the values.
+        await getUserOrders();
       } catch (error) {
-        console.error('Error fetching orders:', error); // Log any errors
+        console.error("Error fetching orders:", error);
       } finally {
-        setLoading(false); // Ensure loading is false after the fetch
+        setLoading(false);
       }
     };
 
-    loadOrders(); // Invoke the function to load orders
-  }, []); // Include fetchOrders as a dependency
-  
+    // Call loadOrders only once when the component mounts
+    loadOrders();
+  }, [currency, orders]); // Added currency and orders as dependencies to see updates
+
   return (
     <div className="border-t pt-16">
       <div className="text-2xl">
@@ -37,16 +35,29 @@ const Orders = () => {
             orders.map((order, index) => (
               <div key={index} className="py-4 border-t border-b text-gray-700">
                 <p className="font-semibold text-lg mb-2">
-                  Order ID: {order.id} - Date: {order.date}
+                  Order ID: {order._id}
+                </p>
+                <p className="font-semibold text-lg mb-2">
+                  Date: {new Date(order.date).toLocaleDateString()}
                 </p>
                 {order.items.map((item, itemIndex) => (
-                  <div key={itemIndex} className="flex flex-col md:flex-row md:items-center gap-4 py-4 border-b">
+                  <div
+                    key={itemIndex}
+                    className="flex flex-col md:flex-row md:items-center gap-4 py-4 border-b"
+                  >
                     <div className="flex items-start gap-6 text-sm w-full md:w-1/2">
-                      <img className="w-16 sm:w-20" src={item.productImage} alt="" />
+                      <img
+                        className="w-16 sm:w-20"
+                        src={item.images[0]}
+                        alt=""
+                      />
                       <div>
-                        <p className="sm:text-base font-medium">{item.productName}</p>
+                        <p className="sm:text-base font-medium">{item.name}</p>
                         <div className="flex items-center gap-3 mt-2 text-base text-gray-700">
-                          <p className="text-lg">{currency}{item.productPrice}</p>
+                          <p className="text-lg">
+                            {currency}
+                            {item.price}
+                          </p>
                           <p>Quantity: {item.quantity}</p>
                           <p>Size: {item.size}</p>
                         </div>
