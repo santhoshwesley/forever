@@ -9,11 +9,12 @@ const ShopContextProvider = (props) => {
   const currency = "$";
   const delivery_fee = 10;
   const backendUrl = import.meta.env.VITE_BACKEND_URL;
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useState('');
   const [showSearch, setShowSearch] = useState(false);
   const [cartItems, setCartItems] = useState({});
   const [products, setProducts] = useState([]);
   const [orders, setOrders] = useState([]);
+  const [token, setToken] = useState('')
   const navigate = useNavigate();
 
   const placeOrder = async (orderData) => {
@@ -48,30 +49,37 @@ const ShopContextProvider = (props) => {
     }
   };
 
-  const addToCart = (itemId, size) => {
+  const addToCart = async (itemId, size) => {
     if (!size) {
       toast.error("Select Product Size");
       return;
     }
 
-    const updatedCart = { ...cartItems };
-    if (updatedCart[itemId]) {
-      updatedCart[itemId][size] = (updatedCart[itemId][size] || 0) + 1;
-    } else {
-      updatedCart[itemId] = { [size]: 1 };
+    if (token) {
+      try {
+
+        await axios.post(backendUrl + '/api/cart/add', { itemId, size }, { headers: { token } })
+
+      } catch (error) {
+        console.log(error)
+        toast.error(error.message)
+
+      }
     }
-    setCartItems(updatedCart);
   };
 
-  const updateQuantity = (itemId, size, quantity) => {
+  const updateQuantity = async (itemId, size, quantity) => {
+    // Update the frontend cart state
     setCartItems((prevCart) => {
       const updatedCart = { ...prevCart };
       if (quantity > 0) {
+        // Update quantity if greater than 0
         updatedCart[itemId] = {
           ...(updatedCart[itemId] || {}),
           [size]: quantity,
         };
       } else {
+        // Remove the item if quantity is 0
         delete updatedCart[itemId][size];
         if (Object.keys(updatedCart[itemId]).length === 0) {
           delete updatedCart[itemId];
@@ -79,7 +87,23 @@ const ShopContextProvider = (props) => {
       }
       return updatedCart;
     });
+  
+    // Sync with the backend if the user is logged in
+    if (token) {
+      try {
+        // Send request to update the cart in the backend
+        await axios.post(
+          `${backendUrl}/api/cart/update`,
+          { itemId, size, quantity },
+          { headers: { token } }
+        );
+      } catch (error) {
+        console.error("Failed to update cart:", error);
+        toast.error(error.message);
+      }
+    }
   };
+  
 
   const getCartCount = () => {
     return Object.values(cartItems).reduce((total, sizes) => {
@@ -121,9 +145,47 @@ const ShopContextProvider = (props) => {
     }
   };
 
+  const getUserCart = async () => {
+    try {
+      
+       const response = await axios.post(backendUrl + '/api/cart/get',{},{headers:{token}})
+       if (response.data.success) {
+        setCartItems(response.data.cartData)
+       }
+
+    } catch (error) {
+      console.error(error);
+      toast.error(error.message);
+    }
+  }
+
   useEffect(() => {
     getProductsData();
   }, []);
+
+  // useEffect(() => {
+  //   if (!token && localStorage.getItem('token')) {
+  //     setToken(localStorage.getItem('token'))
+  //     getUserCart(localStorage.getItem('token'))
+  //   }
+  // }, [])
+
+  useEffect(() => {
+    // Check for token in local storage on component mount
+    const savedToken = localStorage.getItem('token');
+    if (savedToken) {
+      setToken(savedToken);
+    }
+  }, []);
+  
+  useEffect(() => {
+    // Fetch cart data once token is available
+    if (token) {
+      getUserCart();
+    }
+  }, [token]);
+  
+  
 
   const value = {
     products,
@@ -134,6 +196,7 @@ const ShopContextProvider = (props) => {
     showSearch,
     setShowSearch,
     cartItems,
+    setCartItems, 
     addToCart,
     getCartCount,
     getCartAmount,
@@ -141,7 +204,10 @@ const ShopContextProvider = (props) => {
     orders,
     navigate,
     updateQuantity,
-  };
+    setToken,
+    token,
+    backendUrl
+};
 
   return (
     <ShopContext.Provider value={value}>{props.children}</ShopContext.Provider>
