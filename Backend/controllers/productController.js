@@ -32,7 +32,6 @@
 // }
 // imagesUrl
 
-
 // //function for list product
 // const listProducts = async (req, res) => {
 
@@ -82,7 +81,7 @@ const addProduct = async (req, res) => {
         return result.secure_url;
       })
     );
-    console.log(imagesUrl);
+
     const newProduct = await productModel.create({
       name,
       description,
@@ -90,17 +89,14 @@ const addProduct = async (req, res) => {
       images: imagesUrl,
       category,
       subCategory,
-      sizes,
+      sizes: JSON.parse(sizes),
       bestseller,
-      date: Date.now(),
     });
 
     res.json({ success: true, product: newProduct });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
-  //   console.log(req.body);
-  //   console.log(req.files);
 };
 
 const listProducts = async (req, res) => {
@@ -133,4 +129,3 @@ const singleProduct = async (req, res) => {
 };
 
 export { listProducts, addProduct, removeProduct, singleProduct };
-

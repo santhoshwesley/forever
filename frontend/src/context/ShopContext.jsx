@@ -175,7 +175,7 @@ const ShopContextProvider = (props) => {
     try {
       const response = await axios.post(
         `${backendUrl}/api/order/userorders`,
-        { userId: token }, // Ensure you're sending the userId
+        { userId: token },
         { headers: { token } }
       );
       if (response.data.success) {

@@ -1,8 +1,10 @@
 import React, { useContext, useEffect, useState } from "react";
 import { ShopContext } from "../context/ShopContext";
 import Title from "../components/Title";
+import { useNavigate } from "react-router-dom";
 
 const Orders = () => {
+  const navigate = useNavigate();
   const { orders, currency, getUserOrders } = useContext(ShopContext);
   const [loading, setLoading] = useState(true);
 
@@ -65,10 +67,22 @@ const Orders = () => {
                     </div>
                     <div className="flex items-center justify-center w-full md:w-1/4">
                       <span className="w-2 h-2 rounded-full bg-green-500 mr-2"></span>
-                      <p className="text-sm md:text-base">Ready to Ship</p>
+                      <p className="text-sm md:text-base">
+                        {order.status?.toLowerCase() === "order placed"
+                          ? "Ready to Ship"
+                          : order.status || "Pending"}
+                      </p>
                     </div>
+
                     <div className="flex justify-center w-full md:w-1/4">
-                      <button className="border px-4 py-2 text-sm font-medium rounded-sm">
+                      <button
+                        onClick={() =>
+                          navigate(
+                            `/track-order?trackingNumber=${order.trackingNumber}`
+                          )
+                        }
+                        className="border px-4 py-2 text-sm font-medium rounded-sm"
+                      >
                         Track Order
                       </button>
                     </div>
