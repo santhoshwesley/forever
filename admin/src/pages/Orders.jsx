@@ -10,7 +10,6 @@ const Orders = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    console.log("Fetching orders...");
     const loadOrders = async () => {
       try {
         await fetchAllOrders();

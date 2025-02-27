@@ -1,5 +1,4 @@
-// ConfirmationPage.jsx
-import React from 'react';
+import React from "react";
 
 const ConfirmationPage = () => {
   return (
@@ -7,7 +6,6 @@ const ConfirmationPage = () => {
       <h1>Order Confirmed!</h1>
       <p>Your order has been successfully placed.</p>
       <p>Thank you for shopping with us!</p>
-      {/* You can add more details about the order or any next steps here */}
     </div>
   );
 };

@@ -9,13 +9,13 @@ const Product = () => {
   const { products, currency, addToCart } = useContext(ShopContext);
   const [productData, setProductData] = useState(null);
   const [image, setImage] = useState("");
-  const [sizes, setSizes] = useState([]); // Change to track multiple selected sizes
+  const [sizes, setSizes] = useState([]);
 
   const fetchProductData = () => {
     const foundProduct = products.find((item) => item._id === productId);
     if (foundProduct) {
       setProductData(foundProduct);
-      setImage(foundProduct.images[0]); // Accessing images correctly
+      setImage(foundProduct.images[0]);
     }
   };
 
@@ -90,7 +90,7 @@ const Product = () => {
             </div>
           </div>
           <button
-            onClick={() => addToCart(productData._id, sizes)} // Pass sizes array to addToCart
+            onClick={() => addToCart(productData._id, sizes)}
             className="bg-black text-white px-8 py-3 text-sm active:bg-gray-700"
           >
             ADD TO CART

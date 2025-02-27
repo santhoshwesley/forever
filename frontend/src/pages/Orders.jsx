@@ -11,7 +11,6 @@ const Orders = () => {
   useEffect(() => {
     const loadOrders = async () => {
       try {
-        // Log currency and orders to see the values.
         await getUserOrders();
       } catch (error) {
         console.error("Error fetching orders:", error);
@@ -20,9 +19,8 @@ const Orders = () => {
       }
     };
 
-    // Call loadOrders only once when the component mounts
     loadOrders();
-  }, [currency, orders]); // Added currency and orders as dependencies to see updates
+  }, [currency, orders]);
 
   return (
     <div className="border-t pt-16">

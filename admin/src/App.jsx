@@ -6,6 +6,7 @@ import Add from "./pages/Add";
 import List from "./pages/List";
 import Orders from "./pages/Orders";
 import Login from "./components/Login";
+import TrackOrder from "./pages/TrackOrder";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { AdminProvider } from "./context/AdminContext";
@@ -38,6 +39,10 @@ const App = () => {
                   <Route path="/add" element={<Add token={token} />} />
                   <Route path="/list" element={<List token={token} />} />
                   <Route path="/orders" element={<Orders token={token} />} />
+                  <Route
+                    path="/track-order"
+                    element={<TrackOrder token={token} />}
+                  />
                 </Routes>
               </div>
             </div>

@@ -59,3 +59,67 @@ a.active hr {
 .inactive-link {
   color: gray;
 }
+/* Navbar Container */
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #333;
+  color: white;
+  padding: 15px 20px;
+  position: relative;
+}
+
+/* Brand Logo */
+.nav-logo {
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+/* Navigation Links */
+.nav-links {
+  list-style: none;
+  display: flex;
+  gap: 15px;
+}
+
+.nav-links li a {
+  color: white;
+  text-decoration: none;
+  font-size: 1rem;
+}
+
+.nav-links li a:hover {
+  color: #ddd;
+}
+
+/* Search Icon */
+.search-icon {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 1.2rem;
+  cursor: pointer;
+}
+
+/* Search Bar */
+.search-bar {
+  position: absolute;
+  top: 50px;
+  right: 20px;
+  background: white;
+  padding: 5px;
+  border: 1px solid #ccc;
+  display: flex;
+}
+
+.search-bar input {
+  border: none;
+  outline: none;
+  padding: 5px;
+  font-size: 1rem;
+}
+.card-image {
+  height: 300px;
+  width: 270px;
+}

@@ -4,7 +4,7 @@ import CartTotal from "../components/CartTotal";
 import { assets } from "../assets/assets";
 import { ShopContext } from "../context/ShopContext";
 import { toast } from "react-toastify";
-import axios from 'axios'
+import axios from "axios";
 
 const PlaceOrder = () => {
   const [method, setMethod] = useState("cod");
@@ -17,7 +17,7 @@ const PlaceOrder = () => {
     getCartAmount,
     delivery_fee,
     products,
-    placeOrder, // Assuming `placeOrder` exists in your context
+    placeOrder,
   } = useContext(ShopContext);
 
   const [deliveryInfo, setDeliveryInfo] = useState({
@@ -37,11 +37,9 @@ const PlaceOrder = () => {
     setDeliveryInfo((prev) => ({ ...prev, [name]: value }));
   };
 
- 
   const onSubmitHandler = async (event) => {
-    event.preventDefault(); // Prevent the default form submission
+    event.preventDefault();
     try {
-      // Construct the order items array
       let orderItems = [];
       for (const items in cartItems) {
         for (const item in cartItems[items]) {
@@ -57,57 +55,61 @@ const PlaceOrder = () => {
           }
         }
       }
-  
+
       // Prepare delivery and payment data
       const orderData = {
-        address: deliveryInfo, // Updated from formData to deliveryInfo
+        address: deliveryInfo,
         items: orderItems,
         amount: getCartAmount() + delivery_fee,
       };
-  
+
       switch (method) {
         // API calls for COD orders
-        case 'cod':
+        case "cod":
           const response = await axios.post(
-            backendUrl + '/api/order/place',
+            backendUrl + "/api/order/place",
             orderData,
             { headers: { token } }
           );
           if (response.data.success) {
             setCartItems({});
-            navigate('/confirmation'); // Redirect to confirmation after placing order
+            navigate("/confirmation");
           } else {
             toast.error(response.data.message);
           }
           break;
 
-          case 'stripe' : 
-           const responseStripe = await axios.post(backendUrl + '/api/order/stripe',orderData,{headers:{token}})
-           console.log(responseStripe.data);
-           
-             if (responseStripe.data.success) {
-              const {session_url} = responseStripe.data
-              window.location.replace(session_url)
-             } else {
-              toast.error(responseStripe.data.message)
-             }
+        case "stripe":
+          const responseStripe = await axios.post(
+            backendUrl + "/api/order/stripe",
+            orderData,
+            { headers: { token } }
+          );
+
+          if (responseStripe.data.success) {
+            const { session_url } = responseStripe.data;
+            window.location.replace(session_url);
+          } else {
+            toast.error(responseStripe.data.message);
+          }
 
           break;
-  
+
         // Handle other payment methods here if necessary
         default:
-          // Call placeOrder for non-COD methods, if needed
-          await placeOrder({ ...deliveryInfo, paymentMethod: method, orderItems });
-          navigate("/confirmation"); // Redirect to confirmation for other payment methods
+          await placeOrder({
+            ...deliveryInfo,
+            paymentMethod: method,
+            orderItems,
+          });
+          navigate("/confirmation");
           break;
       }
-  
     } catch (error) {
       console.error("Error placing order:", error);
       toast.error("Error placing order. Please try again.");
     }
   };
-  
 
   return (
     <form

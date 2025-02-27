@@ -7,7 +7,7 @@ import { useNavigate } from "react-router-dom";
 const Login = () => {
   const [currentState, setCurrentState] = useState("Login");
   const { token, setToken, backendUrl } = useContext(ShopContext);
-  const navigate = useNavigate(); // Get the navigate function
+  const navigate = useNavigate();
 
   const [name, setName] = useState("");
   const [password, setPassword] = useState("");
@@ -16,38 +16,39 @@ const Login = () => {
   const onSubmitHandler = async (event) => {
     event.preventDefault();
     try {
-      console.log("Backend URL:", backendUrl);
-      console.log("Entered Email:", email);
+      if (currentState === "Login") {
+        // Login API Call
+        const url = `${backendUrl}/api/user/login`;
+        const response = await axios.post(url, { email, password });
 
-      // Check if admin email
-      if (email === import.meta.env.VITE_ADMIN_EMAIL) {
-        console.log("Admin detected, redirecting to Admin Login...");
-        navigate("/admin/login");
-        return;
-      }
-
-      let url = `${backendUrl}/api/user/login`;
-
-      console.log("API Request URL:", url);
-
-      const response = await axios.post(url, { email, password });
-
-      console.log("API Response:", response.data);
-
-      if (response.data.success) {
-        setToken(response.data.token);
-        localStorage.setItem("token", response.data.token);
-        toast.success("Login Successful");
-        navigate("/"); // Redirect after login
+        if (response.data.success) {
+          setToken(response.data.token);
+          localStorage.setItem("token", response.data.token);
+          toast.success("Login Successful");
+          navigate("/");
+        } else {
+          toast.error(response.data.message);
+        }
       } else {
-        toast.error(response.data.message);
+        // Register API Call
+        const url = `${backendUrl}/api/user/register`;
+        const response = await axios.post(url, { name, email, password });
+
+        if (response.data.success) {
+          setToken(response.data.token);
+          localStorage.setItem("token", response.data.token);
+          toast.success("Registration Successful");
+          navigate("/");
+        } else {
+          toast.error(response.data.message);
+        }
       }
     } catch (error) {
       console.log("API Error:", error);
 
       if (error.response) {
         console.log("Error Response:", error.response.data);
-        toast.error(error.response.data.message || "Login failed");
+        toast.error(error.response.data.message || "Something went wrong");
       } else {
         toast.error("Something went wrong");
       }
@@ -69,9 +70,8 @@ const Login = () => {
         <p className="prata-regular text-3xl">{currentState}</p>
         <hr className="border-none h-[1.5px] w-8 bg-gray-800" />
       </div>
-      {currentState === "Login" ? (
-        ""
-      ) : (
+
+      {currentState === "Sign Up" && (
         <input
           onChange={(e) => setName(e.target.value)}
           value={name}
@@ -81,6 +81,7 @@ const Login = () => {
           required
         />
       )}
+
       <input
         onChange={(e) => setEmail(e.target.value)}
         value={email}
@@ -97,14 +98,26 @@ const Login = () => {
         placeholder="Password"
         required
       />
+
       <div className="w-full flex justify-between text-sm mt-[-8px]">
         <p className="cursor-pointer">Forgot Password?</p>
         {currentState === "Login" ? (
-          <p onClick={() => setCurrentState("Sign Up")}>Create account</p>
+          <p
+            onClick={() => setCurrentState("Sign Up")}
+            className="cursor-pointer"
+          >
+            Create account
+          </p>
         ) : (
-          <p onClick={() => setCurrentState("Login")}>Login Here</p>
+          <p
+            onClick={() => setCurrentState("Login")}
+            className="cursor-pointer"
+          >
+            Login Here
+          </p>
         )}
       </div>
+
       <button className="bg-black text-white font-light px-8 py-2 mt-4">
         {currentState === "Login" ? "Sign In" : "Sign Up"}
       </button>

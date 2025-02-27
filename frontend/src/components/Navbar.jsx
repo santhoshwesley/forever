@@ -1,20 +1,16 @@
 import React, { useContext, useState } from "react";
 import { assets } from "../assets/assets";
-import { Link, NavLink, useLocation } from "react-router-dom";
+import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
 import { ShopContext } from "../context/ShopContext";
+import SearchBar from "./SearchBar";
 
 const Navbar = () => {
   const [visible, setVisible] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
 
-  const {
-    setShowSearch,
-    getCartCount,
-    navigate,
-    token,
-    setToken,
-    setCartItems,
-  } = useContext(ShopContext);
+  const { setShowSearch, getCartCount, token, setToken, setCartItems } =
+    useContext(ShopContext);
 
   const logout = () => {
     navigate("/login");
@@ -23,8 +19,16 @@ const Navbar = () => {
     setCartItems({});
   };
 
+  // Handle search icon click
+  const handleSearchClick = () => {
+    if (!location.pathname.includes("collection")) {
+      navigate("/collection");
+    }
+    setShowSearch(true);
+  };
+
   return (
-    <div className="flex items-center justify-between py-5 font-medium">
+    <div className="flex items-center justify-between py-5 font-medium relative">
       <Link to="/">
         <img src={assets.logo} className="w-36" alt="Logo" />
       </Link>
@@ -56,8 +60,14 @@ const Navbar = () => {
 
       {/* Icons Section */}
       <div className="flex items-center gap-6">
+        {/* Search Icon */}
         <img
-          onClick={() => setShowSearch(true)}
+          onClick={() => {
+            if (!location.pathname.includes("collection")) {
+              navigate("/collection");
+            }
+            setShowSearch(true);
+          }}
           src={assets.search_icon}
           className="w-5 cursor-pointer"
           alt="Search"
@@ -106,39 +116,8 @@ const Navbar = () => {
         />
       </div>
 
-      {/* Sidebar Menu for Mobile */}
-      <div
-        className={`absolute top-0 right-0 bottom-0 bg-white transition-all ${
-          visible ? "w-full" : "w-0"
-        }`}
-      >
-        <div className="flex flex-col text-gray-600">
-          <div
-            onClick={() => setVisible(false)}
-            className="flex items-center gap-4 p-3 cursor-pointer"
-          >
-            <img
-              className="h-4 rotate-180"
-              src={assets.dropdown_icon}
-              alt="Back"
-            />
-            <p>Back</p>
-          </div>
-          {["/", "/collection", "/about", "/contact"].map((path, index) => {
-            const labels = ["HOME", "COLLECTION", "ABOUT", "CONTACT"];
-            return (
-              <NavLink
-                key={path}
-                onClick={() => setVisible(false)}
-                className="py-2 pl-6 border"
-                to={path}
-              >
-                {labels[index]}
-              </NavLink>
-            );
-          })}
-        </div>
-      </div>
+      {/* Search Bar Component */}
+      <SearchBar />
     </div>
   );
 };

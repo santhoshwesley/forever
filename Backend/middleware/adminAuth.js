@@ -2,7 +2,7 @@ import jwt from "jsonwebtoken";
 
 const adminAuth = async (req, res, next) => {
   try {
-    const token = req.headers.authorization?.split(" ")[1]; // Extract token from Bearer scheme
+    const token = req.headers.authorization?.split(" ")[1];
     if (!token) {
       return res.json({
         success: false,
@@ -19,7 +19,7 @@ const adminAuth = async (req, res, next) => {
       });
     }
 
-    req.admin = token_decode; // Attach decoded token data to request
+    req.admin = token_decode;
     next();
   } catch (error) {
     console.log(error);

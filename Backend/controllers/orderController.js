@@ -51,7 +51,7 @@ export const placeOrder = async (req, res) => {
       amount,
       paymentMethod: "COD",
       payment: false,
-      estimatedDelivery: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 Days from order date
+      estimatedDelivery: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
       trackingNumber,
     });
 
